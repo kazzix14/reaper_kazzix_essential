@@ -1,0 +1,10 @@
+﻿  main.cpp
+C:\Users\kazuma\Documents\Projects\reaper_kazzix_essential\main.cpp(23,27): warning C4244: '初期化中': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\Users\kazuma\Documents\Projects\reaper_kazzix_essential\main.cpp(71,13): warning C4244: '初期化中': 'double' から 'float' への変換です。データが失われる可能性があります。
+     ライブラリ C:\Users\kazuma\Documents\Projects\reaper_kazzix_essential\x64\Release\reaper_kazzix_essential.lib とオブジェクト C:\Users\kazuma\Documents\Projects\reaper_kazzix_essential\x64\Release\reaper_kazzix_essential.exp を作成中
+  コード生成しています。
+  1 of 40 functions ( 2.5%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  コード生成が終了しました。
+  reaper_kazzix_essential.vcxproj -> C:\Users\kazuma\Documents\Projects\reaper_kazzix_essential\x64\Release\reaper_kazzix_essential.dll
