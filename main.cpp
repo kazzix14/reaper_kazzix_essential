@@ -15,69 +15,83 @@ enum Section
 	MediaExplorer    = 32063,
 };
 
-static void insert_ready_to_create_track(){
+// 0 based
+int last_selected_track_index() {
 	int num_selected_tracks = CountSelectedTracks(0);
 	MediaTrack* selected_track = GetSelectedTrack(0, num_selected_tracks - 1);
 
 	// decrement the return value because it is 1 based
 	int selected_track_index = GetMediaTrackInfo_Value(selected_track, "IP_TRACKNUMBER") - 1;
 
-	// insert new track bellow the selected track
-	int new_track_index = selected_track_index + 1;
+	// if no track is selected, returns end of TCP
+	if (selected_track_index == 0)
+		selected_track_index = GetNumTracks() - 1;
+
+	return selected_track_index;
+}
+
+
+void lock_track_height(MediaTrack* track, int track_height) {
+	if (track_height <= 0) track_height = 24;
+	SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", track_height);
+	SetMediaTrackInfo_Value(track, "B_HEIGHTLOCK", 1.0);
+}
+
+void hide_track(MediaTrack* track) {
+	SetMediaTrackInfo_Value(track, "B_SHOWINMIXER", 0.0);
+	SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0.0);
+}
+
+MediaTrack* insert_track(int new_track_index, std::string track_name, int track_height) {
 	InsertTrackAtIndex(new_track_index, true);
 	MediaTrack* new_track = GetTrack(0, new_track_index);
+	lock_track_height(new_track, track_height);
+	GetSetMediaTrackInfo_String(new_track, "P_NAME", const_cast<char*>(track_name.c_str()), true);
+	return new_track;
+}
 
-	// adjest track height in TCP and lock it
-	SetMediaTrackInfo_Value(new_track, "I_HEIGHTOVERRIDE", 24.0);
-	SetMediaTrackInfo_Value(new_track, "B_HEIGHTLOCK", 1.0);
+void insert_plugin(MediaTrack* track, std::string plugin_name) {
+	if (TrackFX_AddByName(track, plugin_name.c_str(), false, 1) == -1)
+		ShowMessageBox("Failed to insert 'Console7Channel (airwindows)'into a track", "Error", 5);
+}
 
-	// name new track
-	GetSetMediaTrackInfo_String(new_track, "P_NAME", const_cast<char*>("New Track"), true);
-
-	// insert console track at the end of TCP
-	int new_console_track_index = GetNumTracks();
-	InsertTrackAtIndex(new_console_track_index, false);
-	MediaTrack* new_console_track = GetTrack(0, new_console_track_index);
-
-	// hide console track
-	SetMediaTrackInfo_Value(new_console_track, "B_SHOWINMIXER", 0.0);
-	SetMediaTrackInfo_Value(new_console_track, "B_SHOWINTCP", 0.0);
-
-	// adjest console track height in TCP and lock it
-	SetMediaTrackInfo_Value(new_console_track, "I_HEIGHTOVERRIDE", 24.0);
-	SetMediaTrackInfo_Value(new_console_track, "B_HEIGHTLOCK", 1.0);
-
-	// name new console track
-	GetSetMediaTrackInfo_String(new_console_track, "P_NAME", const_cast<char*>("Console Emulation"), true);
-
-	// turn off the main send(master send)
-	SetMediaTrackInfo_Value(new_track, "B_MAINSEND", 0.0);
-
-	// create send to console track
-	if (CreateTrackSend(new_track, new_console_track) < 0)
-		ShowMessageBox("Failed to create send to console track", "Error", 5);
-
-	// turn off the main send(master send)
-	SetMediaTrackInfo_Value(new_track, "B_MAINSEND", 0.0);
-	
-	// insert console 7 plugin
-	if (TrackFX_AddByName(new_console_track, "Console7Channel (airwindows)", false, 1) == -1)
-		ShowMessageBox("Failed to insert 'Console7Channel (airwindows)'into console track", "Error", 5);
-
-	// color tracks
+void color_tracks() {
 	int num_tracks = GetNumTracks();
 	for (int track_index = 0; track_index < num_tracks; track_index++) {
 		float track_position = static_cast<float>(track_index) / static_cast<float>(num_tracks);
-		float hue = track_position * 255.0 * 2.0;
+		float hue = track_position * 255.0;
 		color::hsv<uint8_t> hsv({ static_cast<uint8_t>(hue), 255, 255 });
 		int color = ColorToNative(color::get::red(hsv), color::get::green(hsv), color::get::blue(hsv));
 
 		MediaTrack* track = GetTrack(0, track_index);
 		SetTrackColor(track, color);
 	}
+}
 
-	// select new track
-	SetOnlyTrackSelected(new_track);
+static void insert_ready_to_create_track(){
+	int index = last_selected_track_index() + 1;
+	MediaTrack* new_track = insert_track(index, "Track", 0);
+
+	insert_plugin(new_track, "Channel9 (airwindows)");
+	insert_plugin(new_track, "ReaEQ (Cockos)");
+	insert_plugin(new_track, "Pyewacket (airwindows)");
+	insert_plugin(new_track, "HardVacuum (airwindows)");
+	insert_plugin(new_track, "EQ (airwindows)");
+	insert_plugin(new_track, "StereoFX (airwindows)");
+	insert_plugin(new_track, "PurestGain (airwindows)");
+
+	color_tracks();
+}
+
+static void insert_ready_to_create_folder(){
+	int index = last_selected_track_index() + 1;
+	MediaTrack* new_track = insert_track(index, "Folder", 0);
+
+	insert_plugin(new_track, "Channel9 (airwindows)");
+	insert_plugin(new_track, "ReaEQ (Cockos)");
+	insert_plugin(new_track, "PurestGain (airwindows)");
+
+	color_tracks();
 }
 
 static struct CustomAction {
@@ -94,6 +108,16 @@ static struct CustomAction {
 			0, // reserved
 		},
 		insert_ready_to_create_track,
+	},
+	{
+		0,
+		{
+			static_cast< int >( Section::Main ), // section that this action appears
+			"kazzix_insert_ready_to_create_folder", // action id
+			"Kazzix: Insert a folder and add some essential FX", // description
+			0, // reserved
+		},
+		insert_ready_to_create_folder,
 	}
 };
 
