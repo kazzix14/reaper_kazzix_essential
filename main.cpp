@@ -72,13 +72,9 @@ static void insert_ready_to_create_track(){
 	int index = last_selected_track_index() + 1;
 	MediaTrack* new_track = insert_track(index, "Track", 0);
 
-	insert_plugin(new_track, "Channel9 (airwindows)");
 	insert_plugin(new_track, "ReaEQ (Cockos)");
-	insert_plugin(new_track, "Pyewacket (airwindows)");
-	insert_plugin(new_track, "HardVacuum (airwindows)");
-	insert_plugin(new_track, "EQ (airwindows)");
-	insert_plugin(new_track, "StereoFX (airwindows)");
 	insert_plugin(new_track, "PurestGain (airwindows)");
+	insert_plugin(new_track, "Channel9 (airwindows)");
 
 	color_tracks();
 }
@@ -87,9 +83,9 @@ static void insert_ready_to_create_folder(){
 	int index = last_selected_track_index() + 1;
 	MediaTrack* new_track = insert_track(index, "Folder", 0);
 
-	insert_plugin(new_track, "Channel9 (airwindows)");
 	insert_plugin(new_track, "ReaEQ (Cockos)");
-	insert_plugin(new_track, "PurestGain (airwindows)");
+	insert_plugin(new_track, "Logical4 (airwindows)");
+	insert_plugin(new_track, "Channel9 (airwindows)");
 
 	color_tracks();
 }
